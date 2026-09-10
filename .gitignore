@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Downloaded on demand by scripts/download_model.py (~7.6 MB).
+models/hand_landmarker.task
+
+# Screenshots and recordings.
+captures/

@@ -1,0 +1,7 @@
+# Python 3.9-3.12 only. mediapipe publishes no wheels for 3.13+.
+#
+# Deliberately no opencv-python here: mediapipe already pulls in
+# opencv-contrib-python, and installing both puts two copies of the cv2
+# extension module in the same environment, which breaks in confusing ways.
+mediapipe>=1.0
+numpy>=1.24

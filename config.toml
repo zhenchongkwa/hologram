@@ -1,0 +1,313 @@
+# Hologram Glitch Band - tunable settings.
+# Press "c" while the app is running to reload this file without restarting.
+# All colours are BGR, the order OpenCV uses.
+
+[camera]
+index = 0
+width = 1280
+height = 720
+fps = 30
+mirror = true
+
+[tracking]
+max_hands = 2
+detection_confidence = 0.6
+presence_confidence = 0.5
+tracking_confidence = 0.5
+# EMA factor for the tracked fingertips: higher follows your fingers faster,
+# lower is smoother but laggier.
+point_smoothing = 0.5
+
+[shape]
+# How far the outline sits past your fingertips, as a fraction of its size.
+expand = 0.12
+# Shapes smaller than this many pixels across are skipped, so the effect
+# doesn't flicker as your fingers close.
+min_size = 28
+# Per-hand mode: the thumb-to-index span becomes an ellipse this fraction as
+# wide as it is long.
+ellipse_ratio = 0.62
+
+# The shape twists because your fingertips move: the corners are joined index to
+# index and thumb to thumb, so counter-rotating your hands drags one rail across
+# the other and the shape crosses into an X. There is nothing to tune here - it
+# is just where your fingers are.
+border_thickness = 2
+border_color = [0, 255, 0]
+glow = true
+glow_strength = 0.55
+# Dots on the fingertips currently driving the shape.
+show_points = true
+
+[box]
+# Cube mode - press b. A 3D box held between your hands, with a rose that
+# blooms inside it when you open both palms.
+#
+# Box half-size as a fraction of the distance between your hands. In the clip
+# the box spans a bit over a third of the hand span, so it hangs between the
+# hands rather than filling the gap between them.
+size = 0.19
+# Focal length as a multiple of the box size: larger flattens the perspective,
+# smaller exaggerates it.
+perspective = 2.2
+colour = [0, 255, 0]
+thickness = 2
+glow = 0.55
+# How far turning your hands turns the box, and tipping them tips it.
+turn_gain = 1.6
+tilt_gain = 1.1
+turn_smoothing = 0.25
+# Faint lines from your fingertips to the nearest corner of the box.
+rays = true
+ray_opacity = 0.45
+# Apply the current effect to whatever the box covers.
+effect_inside = true
+
+# The rose. It only partly follows the box's rotation - turned all the way with
+# it, a flat rosette goes edge-on and vanishes to a sliver.
+# The rose is drawn as glowing strokes, never filled - filled flat-shaded
+# polygons are what made the earlier version look faceted and dead.
+# Petals per whorl, innermost ring first. Rings, not one even spiral: a spiral
+# scatters petals into a silhouette that does not read as a rose.
+whorls = [3, 5, 8]
+rose_rows = 10
+rose_cols = 5
+# The glow ramp, BGR: black to core to edge. Deep crimson burning out to a hot
+# warm red where the cloud is densest.
+rose_core = [18, 12, 125]
+rose_edge = [72, 98, 255]
+
+# One open palm on its own shows the rose with no box around it. Size is a
+# multiple of that hand's own scale, so it keeps its proportion at any distance.
+# Lift is the gap above the topmost point of your hand, in hand-scale units.
+# Measured up the screen rather than along the hand's own axis, so the rose
+# stays centred over the middle of your hand however you tilt it.
+solo_size = 1.25
+solo_lift = 1.1
+# Point cloud imported from a real rose model with scripts/import_rose.py.
+# Delete the file (or point this elsewhere) and the generated rose is drawn
+# instead, so the app still works without a model.
+rose_points_file = "models/rose_points.npy"
+rose_point_size = 2
+rose_point_gain = 105.0
+rose_line = 2
+rose_supersample = 2
+rose_glow = 1.0
+rose_bloom_glow = 1.7
+# The rose nearly fills the box. It is a line drawing, and the box is small, so
+# a smaller flower loses its petals to the line weight entirely.
+rose_scale = 0.95
+rose_follow = 0.35
+spin = 0.35
+bloom_speed = 2.2
+bloom_steps = 24
+
+[orb]
+# Hold up index and middle fingers and a sphere of red energy appears off their
+# ends - Gojo's Red. Real 3D: a point cloud rotated and projected the same way
+# the rose is, with great circles turning around it.
+enabled = true
+# Which modes the orb appears in is set under [modes]. Whatever that says, it
+# stays down while the box itself is up - only the rose on a single open palm
+# shares the screen with it.
+# The sphere's radius and its stand-off from the fingers, as multiples of that
+# hand's own scale, so it keeps its proportion whether your hand is near the
+# camera or far from it.
+size = 0.62
+reach = 0.55
+# ...but capped here, in pixels. Both renderers build a buffer the size of the
+# orb's bounding box, so its cost goes as the square of the radius, and a hand
+# right up against the lens would cost a whole frame's budget on its own.
+max_radius = 96.0
+# The sphere is a point cloud and the renderer accumulates, so the radial
+# distribution of the points is the look. core_bias above 1/3 pulls density into
+# the middle - that is the hot core - and shell is the fraction of the points
+# spent on the rim that gives it a silhouette.
+points = 14000
+core_bias = 1.4
+shell = 0.40
+point_size = 3
+point_gain = 150.0
+perspective = 2.4
+# Great circles turning around it. ring_scale is a multiple of the sphere's own
+# radius, so 1.0 would sit exactly on its surface. Each ring is cut into arcs,
+# because the glow renderer shades one depth per curve: whole, a ring would come
+# out flat instead of passing behind the ball.
+rings = 3
+ring_scale = 1.9
+ring_arcs = 8
+line = 1
+# Held below the sphere's own brightness on purpose: left equal, the rings read
+# as the subject and the ball as their backdrop, which is backwards.
+ring_strength = 0.42
+# BGR, black to core to edge - the same shape of ramp the rose uses.
+core_colour = [24, 20, 190]
+edge_colour = [210, 225, 255]
+# The rings burn through their own ramp. The glow renderer's nearest depth band
+# peaks near 222, which on the ramp above comes out white; a red edge keeps the
+# rings red however hot the near side gets.
+ring_edge_colour = [40, 45, 250]
+supersample = 2
+bloom = 2.0
+strength = 1.0
+fade_speed = 4.0
+spin = 0.8
+
+[bloom]
+# A bloom pass over the finished frame - the bright parts bleed light. Key g.
+# The same shape as TouchDesigner's Bloom TOP.
+enabled = true
+# Which modes it runs after is set under [modes].
+# Conditioning before the highlights are picked out: lift the black point, then
+# brightness, then gamma.
+pre_black = 0.08
+pre_brightness = 1.0
+pre_gamma = 1.0
+# Only pixels brighter than this bloom, and how hard the cut is. Measured across
+# a sweep: at 0.62 the pass is barely visible, and by 0.30 the whole background
+# lifts into haze. 0.45 glows the bright parts and leaves the rest alone.
+threshold = 0.45
+soft_knee = true
+# The glow is blurred at several radii between these and averaged, which is what
+# gives a tight core inside a wide halo instead of one flat smear.
+min_radius = 3.0
+max_radius = 22.0
+steps = 3
+intensity = 1.1
+
+# Built at this fraction of the frame. Bloom is blur, so there is no detail in
+# it to lose, and full size costs several times as much.
+scale = 0.5
+
+[slitscan]
+# Every column of the picture from a different moment, dragged by your hand.
+# Frames of history. At half resolution 30 frames of 720p is 20.7 MB.
+length = 30
+# How much of the history is spread across the width. Above 1.0 it wraps into
+# stacked bands of past.
+spread = 1.0
+direction = 1
+# Whether the newest moment follows your hand. Off, it sweeps by itself.
+follow = true
+sweep = 0.25
+smoothing = 0.20
+# Fraction of the frame the history is kept at - this sets the memory as well
+# as the speed: the ring is length x this squared.
+scale = 0.5
+
+[modes]
+# The looks the app cycles through, in the order "n" walks them.
+order = ["shape", "cube", "slitscan"]
+start = "shape"
+# Modes the two-finger orb appears in.
+orb = ["cube"]
+# Modes the full-frame bloom pass runs after. A mode that already fills the
+# picture with light leaves it off - the slit-scan rewrites every pixel, so
+# blooming it lifts the whole frame into haze.
+bloom = ["shape"]
+
+[gestures]
+enabled = true
+# Thumb-to-index distance, over hand size, below which a tap registers.
+# Raise it if taps are hard to trigger, lower it if they fire by accident.
+tap_threshold = 0.38
+# Seconds before another tap is accepted.
+cooldown = 0.7
+
+[effects]
+default = "risograph"
+# Order used by "[", "]" and the number keys.
+order = ["risograph", "cyanotype", "quadtree", "vhs", "ascii", "halftone", "thermal", "dither"]
+
+[effects.risograph]
+# Two spot inks, each screened into dots, printed slightly out of register on
+# paper that shows through. The inks multiply onto the paper rather than adding
+# to it - that is what makes the colour read as printed rather than lit.
+paper = [238, 240, 240]
+ink_a = [0, 255, 0]
+ink_b = [190, 40, 220]
+# Screen cell in pixels. Bigger dots read as coarser paper.
+dot = 6
+grain = 0.10
+# How much ink each pass lays down. The first carries the picture; the second
+# is the accent, weighted to the midtones so the two overlap in a band.
+ink_a_gain = 0.80
+ink_b_gain = 0.55
+# How far the second pass misses register, [rows, columns].
+offset = [2, 1]
+
+[effects.cyanotype]
+# The blueprint. One ramp from Prussian blue through cyan to paper white, with
+# a tone curve baked into the same table.
+contrast = 1.35
+grain = 0.05
+shadow = [92, 46, 16]
+mid = [200, 120, 40]
+paper = [238, 244, 244]
+
+[effects.quadtree]
+# Blocks that keep splitting only where there is detail to justify it.
+# Threshold is the standard deviation inside a block, in grey levels: lower
+# splits more, so the picture comes back in more detail.
+levels = 4
+min_block = 8
+threshold = 26.0
+grid = true
+grid_colour = [0, 255, 0]
+
+[effects.vhs]
+# Chroma bleed is the signature - colour is recorded at a fraction of the luma
+# bandwidth on tape, so it smears sideways and lags the edges it belongs to.
+# Everything else here only sells it.
+smear = 0.28          # how much of the last frame stays on the tape
+chroma_bleed = 18     # sideways smear of the colour, in pixels
+chroma_lag = 4        # and how far it trails the picture
+# Blurring the colour together drains it, so put the tape's oversaturation back.
+saturation = 2.0
+bands = 10            # horizontal bands that slide
+jitter = 5            # how far they slide
+band = 26             # the head-switching band, 0 turns it off
+band_speed = 0.03     # how fast it drifts down the picture
+noise = 0.07
+scanline_gap = 3
+scanline_strength = 0.35
+
+[effects.ascii]
+# Cell width in pixels; the height is cell * aspect, because characters are
+# taller than they are wide.
+cell = 10
+aspect = 1.6
+ramp = " .:-=+*#%@"
+# One ink for every glyph. Delete this line and each character is drawn in the
+# colour of the part of the picture it stands for.
+tint = [0, 255, 0]
+
+[effects.halftone]
+dot = 6
+# Positive: the brighter the picture, the bigger the dot. Set false for ink on
+# paper - dark subject, heavy ink - and swap the two colours below to match.
+positive = true
+ink = [0, 255, 0]
+paper = [0, 0, 0]
+# One screen per channel at three phases instead: a colour print.
+colour = false
+
+[effects.thermal]
+colormap = "JET"
+
+[effects.dither]
+# Bayer cell, rounded up to a power of two. levels = 2 is the 1-bit look.
+matrix = 8
+levels = 2
+ink = [0, 255, 0]
+paper = [0, 0, 0]
+
+[hud]
+enabled = true
+skeleton = true
+color = [0, 255, 0]
+show_help = false
+
+[capture]
+dir = "captures"
+video_fps = 30
